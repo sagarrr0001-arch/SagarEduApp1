@@ -68,9 +68,22 @@ fun GameScreen(navController: NavHostController, viewModel: AppViewModel) {
     var feedbackMessage by remember { mutableStateOf("") }
     var showNextButton by remember { mutableStateOf(false) }
 
-    val totalImages = remember(level) { getTotalImagesInLevel(context, level) }
-    val correctAnswer = remember(level, currentImageIndex) { getAnswerFromFileName(context, level, currentImageIndex) }
-    val imageBitmap = remember(level, currentImageIndex) { getBitmapFromAssetsByIndex(context, level, currentImageIndex) }
+    // Shuffle the question order every time a level starts
+    val shuffledIndices = remember(level) {
+        val total = getTotalImagesInLevel(context, level)
+        (0 until total).shuffled()
+    }
+    val totalImages = shuffledIndices.size
+    
+    // Get the actual index from our shuffled list
+    val actualIndex = remember(currentImageIndex, shuffledIndices) {
+        if (shuffledIndices.isNotEmpty() && currentImageIndex < shuffledIndices.size) 
+            shuffledIndices[currentImageIndex] 
+        else 0
+    }
+
+    val correctAnswer = remember(level, actualIndex) { getAnswerFromFileName(context, level, actualIndex) }
+    val imageBitmap = remember(level, actualIndex) { getBitmapFromAssetsByIndex(context, level, actualIndex) }
 
     // Helper function to play sound
     val playSound = { resId: Int ->
