@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -22,10 +23,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -67,6 +70,8 @@ fun GameScreen(navController: NavHostController, viewModel: AppViewModel) {
     var userAnswer by remember { mutableStateOf("") }
     var feedbackMessage by remember { mutableStateOf("") }
     var showNextButton by remember { mutableStateOf(false) }
+    var showQuitDialog by remember { mutableStateOf(false) }
+    var showInvalidInputDialog by remember { mutableStateOf(false) }
 
     // Shuffle the question order every time a level starts
     val shuffledIndices = remember(level) {
@@ -111,6 +116,43 @@ fun GameScreen(navController: NavHostController, viewModel: AppViewModel) {
             )
             else -> Quadruple(listOf(Color.White, Color.Gray), Color.Black, 1f, Color.DarkGray)
         }
+    }
+
+    if (showQuitDialog) {
+        AlertDialog(
+            onDismissRequest = { showQuitDialog = false },
+            title = { Text("Quit Mission?") },
+            text = { Text("Your current score will be saved. Do you want to exit to the results screen?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showQuitDialog = false
+                    viewModel.saveGameResult()
+                    navController.navigate("score/$totalImages") {
+                        popUpTo("game") { inclusive = true }
+                    }
+                }) {
+                    Text("YES, QUIT")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showQuitDialog = false }) {
+                    Text("CANCEL")
+                }
+            }
+        )
+    }
+
+    if (showInvalidInputDialog) {
+        AlertDialog(
+            onDismissRequest = { showInvalidInputDialog = false },
+            title = { Text("Numbers Only") },
+            text = { Text("This challenge requires a numeric answer. Please enter digits only.") },
+            confirmButton = {
+                TextButton(onClick = { showInvalidInputDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 
     Box(
@@ -198,7 +240,15 @@ fun GameScreen(navController: NavHostController, viewModel: AppViewModel) {
                 ) {
                     OutlinedTextField(
                         value = userAnswer,
-                        onValueChange = { if (!showNextButton) userAnswer = it },
+                        onValueChange = { 
+                            if (!showNextButton) {
+                                if (it.all { char -> char.isDigit() }) {
+                                    userAnswer = it
+                                } else {
+                                    showInvalidInputDialog = true
+                                }
+                            }
+                        },
                         label = { Text("Enter Answer", color = textColor.copy(alpha = 0.8f)) },
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -261,6 +311,18 @@ fun GameScreen(navController: NavHostController, viewModel: AppViewModel) {
                                 color = Color.White
                             )
                         }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedButton(
+                        onClick = { showQuitDialog = true },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        border = BorderStroke(1.dp, btnColor.copy(alpha = 0.5f)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = btnColor)
+                    ) {
+                        Text("QUIT MISSION", style = MaterialTheme.typography.labelLarge)
                     }
                 }
             }

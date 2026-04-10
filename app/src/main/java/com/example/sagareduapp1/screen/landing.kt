@@ -1,6 +1,6 @@
 package com.example.sagareduapp1.screen
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -9,27 +9,27 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.sagareduapp1.R
 import com.example.sagareduapp1.viewmodel.AppViewModel
 
+/**
+ * Landing Screen: The first screen the user sees.
+ * Allows the user to enter their name before proceeding to the game lobby.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandingScreen(navController: NavHostController, viewModel: AppViewModel) {
     var name by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
 
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primary,
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
-        )
-    )
-
+    // Dialog to alert user if name is empty
     if (showErrorDialog) {
         AlertDialog(
             onDismissRequest = { showErrorDialog = false },
@@ -44,10 +44,22 @@ fun LandingScreen(navController: NavHostController, viewModel: AppViewModel) {
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundGradient)
+        modifier = Modifier.fillMaxSize()
     ) {
+        // Background Image (Ensure edu_bg.png is added to res/drawable)
+        Image(
+            painter = painterResource(id = R.drawable.edu_bg),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+
+        // Dark overlay to improve text readability over the background
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Color.Black.copy(alpha = 0.3f)
+        ) {}
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -55,19 +67,22 @@ fun LandingScreen(navController: NavHostController, viewModel: AppViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Main App Title
             Text(
-                text = "EduApp",
+                text = "SagarEduApp",
                 style = MaterialTheme.typography.displayLarge,
-                color = Color.White
+                color = Color.White,
+                fontWeight = FontWeight.Bold
             )
             Text(
                 text = "Your Learning Journey Starts Here",
                 style = MaterialTheme.typography.headlineSmall.copy(fontSize = 16.sp),
-                color = Color.White.copy(alpha = 0.8f)
+                color = Color.White.copy(alpha = 0.9f)
             )
 
             Spacer(modifier = Modifier.height(48.dp))
 
+            // Input Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
@@ -89,6 +104,7 @@ fun LandingScreen(navController: NavHostController, viewModel: AppViewModel) {
 
                     Spacer(modifier = Modifier.height(24.dp))
 
+                    // Continue Button: Sets the name in ViewModel and navigates to settings
                     Button(
                         onClick = {
                             if (name.isNotBlank()) {
