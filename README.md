@@ -21,8 +21,6 @@ SagarEduApp1 is a modern Android educational application built with Jetpack Comp
 - **Database**: [Room](https://developer.android.com/training/data-storage/room)
 - **Navigation**: [Navigation Compose](https://developer.android.com/jetpack/compose/navigation)
 
-## 📱 Screenshots (Optional)
-*Add your app screenshots here*
 
 ## 🏗️ Getting Started
 
